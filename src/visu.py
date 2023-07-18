@@ -1,5 +1,5 @@
-from variable import Variable
 import graphviz
+from src.variable import Variable
 
 
 def draw_graph(root: Variable, format='svg', rankdir='LR') -> graphviz.Digraph:
@@ -14,12 +14,12 @@ def draw_graph(root: Variable, format='svg', rankdir='LR') -> graphviz.Digraph:
 
     def build(root: Variable):
         dat_name = str(id(root))
-        if root.fn != None:
+        if root.fn is not None:
             op_name = str(id(root))+root.fn.graph_label
             dot.node(name=op_name, label=root.fn.graph_label)
             dot.edge(head_name=dat_name, tail_name=op_name)
             for child in root._prev:
-                if op_name != None:
+                if op_name is not None:
                     dot.edge(tail_name=str(id(child)), head_name=op_name)
                 build(child)
         dot.node(name=str(id(root)), label='{data=%s | grad=%s}' % (

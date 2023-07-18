@@ -1,5 +1,5 @@
 import unittest
-from variable import Variable
+from src.variable import Variable
 import numpy as np
 
 

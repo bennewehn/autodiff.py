@@ -27,14 +27,14 @@ class Variable:
     def backward(self):
         self.grad.fill(1)
 
-        if self.fn != None:
+        if self.fn is not None:
             self.fn.backward()
         else:
             raise RuntimeError("No backward path.")
 
         def _backward(var: Variable):
             for child in var._prev:
-                if child.fn != None:
+                if child.fn is not None:
                     child.fn.backward()
                 _backward(child)
 
