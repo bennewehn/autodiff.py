@@ -1,3 +1,2 @@
 graphviz==0.20.1
 numpy==1.25.1
-numpy==1.25.0
