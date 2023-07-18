@@ -30,12 +30,6 @@ class Variable:
             for child in var._prev:
                 if child.fn != None:
                     child.fn.backward()
-                # chain rule
-                # scalar edge cases to match shape
-                if child.grad.shape[0] == 1 and var.grad.shape[0] > 1:
-                    child.grad *= var.grad[0]
-                else:
-                    child.grad *= var.grad
                 _backward(child)
         
         _backward(self)
@@ -75,43 +69,45 @@ class Add(Function):
         self.graph_label = '+'
 
     def forward(self):
-        return Variable(np.add(self.x.data, self.y.data), _children=(self.x, self.y), _fn=self)
+        self.out = Variable(np.add(self.x.data, self.y.data), _children=(self.x, self.y), _fn=self)
+        return self.out
     
     def backward(self):
-        self.x.grad += np.ones(self.x.data.shape, dtype=self.x.dtype)
-        self.y.grad += np.ones(self.x.data.shape, dtype=self.x.dtype)
+        self.x.grad += np.ones(self.x.data.shape, dtype=self.x.dtype) * self.out.grad
+        self.y.grad += np.ones(self.x.data.shape, dtype=self.x.dtype) * self.out.grad
 
 class Dot(Function):
     def __init__(self, x: Variable, y: Variable):
         self.x, self.y = x, y
-        self.graph_label = 'dot'
+        self.graph_label = 'dot()'
 
     def forward(self):
-        return Variable(np.array([np.dot(self.x.data, self.y.data)], dtype=self.x.dtype), _children=(self.x, self.y), _fn=self)
+        self.out = Variable(np.array([np.dot(self.x.data, self.y.data)], dtype=self.x.dtype), _children=(self.x, self.y), _fn=self)
+        return self.out
     
     def backward(self):
-        self.x.grad += self.y.data
-        self.y.grad += self.x.data
+        self.x.grad += self.y.data * self.out.grad
+        self.y.grad += self.x.data * self.out.grad
 
 class Mul(Function):
     def __init__(self, x: Variable, y: Variable):
-        if x is y: y = y.copy()
         self.x, self.y = x, y
         self.graph_label = '*'
 
     def forward(self):
-        return Variable(np.multiply(self.x.data, self.y.data).astype(self.x.dtype), _children=(self.x, self.y), _fn=self)
+        self.out = Variable(np.multiply(self.x.data, self.y.data).astype(self.x.dtype), _children=(self.x, self.y), _fn=self)
+        return self.out
     
     def backward(self):
-        # scalar value edge cases
+        # match scalar shape
         if self.x.grad.shape[0] == 1:
-            self.x.grad += self.y.data.sum()
+            self.x.grad += (self.y.data * self.out.grad).sum()
         else:
-            self.x.grad += self.y.data
+            self.x.grad += self.y.data * self.out.grad
         if self.y.grad.shape[0] == 1:
-            self.y.grad += self.x.data.sum()
+            self.y.grad += (self.x.data * self.out.grad).sum()
         else:
-            self.y.grad += self.x.data # *= to fix prob
+            self.y.grad += self.x.data * self.out.grad
 
 
 '''Reduce ops'''
@@ -121,7 +117,8 @@ class Sum(Function):
         self.graph_label = 'sum()'
 
     def forward(self):
-        return Variable([np.sum(self.x.data, dtype=self.x.dtype)], _children=[self.x], _fn=self)
+        self.out = Variable([np.sum(self.x.data, dtype=self.x.dtype)], _children=[self.x], _fn=self)
+        return self.out
     
     def backward(self):
-        self.x.grad += np.ones(self.x.data.shape, dtype=self.x.dtype)
+        self.x.grad += np.ones(self.x.data.shape, dtype=self.x.dtype) * self.out.grad
