@@ -5,7 +5,7 @@ from autodiff import Variable
 
 class TestVariable(unittest.TestCase):
 
-    def test_matMul(self):
+    def test_matmul(self):
         a = Variable([1, 2, 3])
         b = Variable([2, 3, 4])
         z = a@b
@@ -17,6 +17,16 @@ class TestVariable(unittest.TestCase):
                         "Grad of a should be b")
         self.assertTrue(np.array_equal(b.grad, a.data),
                         "Grad of b should be a")
+
+    def test_matmul2(self):
+        a = Variable([10, 4, 4])
+        b = Variable([2])
+        z = a@a@b
+        z.backward()
+
+        self.assertTrue(np.array_equal(z.data, [264]), "Should be 264")
+        self.assertTrue(np.array_equal(a.grad, 4*a.data), "Should be 4a")
+        self.assertTrue(np.array_equal(b.grad, [132]), "Should be 132")
 
     def test_matmulSelf(self):
         a = Variable([1, 2, 3])
@@ -106,6 +116,18 @@ class TestVariable(unittest.TestCase):
         self.assertTrue(np.array_equal(a.grad, [6]), "Should be 6")
         self.assertTrue(np.array_equal(b.grad, [2, 2, 2]), "Should be twos")
 
+    def test_mul2(self):
+        a = Variable([4, 5, 4])
+        b = Variable([2, 2, 3])
+        z = (a*b)*a
+        z.backward()
+
+        self.assertTrue(np.array_equal(
+            z.data, a.data ** 2 * b.data), "Should be a**2*b")
+        self.assertTrue(np.array_equal(
+            a.grad, [16, 20, 24]))
+        self.assertTrue(np.array_equal(b.grad, [16, 25, 16]))
+
     def test_matmul_mul(self):
         a = Variable([2])
         c = Variable([10, 4, 4])
@@ -158,6 +180,14 @@ class TestVariable(unittest.TestCase):
         self.assertTrue(np.array_equal(
             x.grad, np.ones_like(b.data)), "Should be ones")
 
+    def test_sum2(self):
+        a = Variable([2])
+        z = a.sum()*3
+        z.backward()
+
+        self.assertTrue(np.array_equal(z.data, [6]), "Should be 6")
+        self.assertTrue(np.array_equal(a.grad, [3]))
+
     def test_exp(self):
         a = Variable([1])
         z = a.exp()
@@ -176,6 +206,14 @@ class TestVariable(unittest.TestCase):
         self.assertTrue(np.array_equal(
             a.grad, [(np.exp(a.data*b.data)*b.data).sum()]))
         self.assertTrue(np.array_equal(b.grad, np.exp(a.data*b.data)*a.data))
+
+    def test_exp_self(self):
+        a = Variable([2])
+        z = (a.exp()).exp()
+        z.backward()
+
+        self.assertTrue(np.isclose(z.data, np.exp(np.exp(a.data))))
+        self.assertTrue(np.isclose(a.grad, z.data*np.exp(a.data)))
 
     def test_pow(self):
         a = Variable([2])
@@ -198,6 +236,29 @@ class TestVariable(unittest.TestCase):
             a.grad, [(np.power(b.data, a.data) * np.log(b.data)).sum()]))
         self.assertTrue(np.array_equal(b.grad, 2*b.data))
 
+    def test_pow3(self):
+        a = Variable([2])
+        b = Variable([2, 2, 3])
+        z = (a**b)**a
+        z.backward()
+
+        self.assertTrue(np.array_equal(z.data, [16, 16, 64]))
+        self.assertTrue(np.array_equal(
+            a.grad, [(b.data*a.data**(a.data*b.data)*(np.log(a.data)+1)).sum()]))
+        self.assertTrue(np.isclose(
+            b.grad, np.array([a.data**(b.data*a.data+1)*np.log(a.data)])).all())
+
+    def test_pow4(self):
+        a = Variable([2])
+        b = Variable([2, 2, 3])
+        z = ((a**b)**a)**a
+        z.backward()
+
+        self.assertTrue(np.array_equal(z.data, [256, 256, 4096]))
+        self.assertTrue(np.isclose(a.grad, [63532.7031]))
+        self.assertTrue(np.isclose(
+            b.grad, [709.7827, 709.7827, 11356.5234]).all())
+
     def test_div(self):
         a = Variable([10, 4, 4])
         b = Variable([1, 2, 3])
@@ -214,12 +275,55 @@ class TestVariable(unittest.TestCase):
         z = a/b
         z.backward()
 
-        self.assertTrue(np.array_equal(
-            z.data, np.divide(a.data, b.data)))
+        self.assertTrue(np.array_equal(z.data, np.divide(a.data, b.data)))
         self.assertTrue(np.array_equal(
             a.grad, (1/b.data) * np.ones_like(a.data)))
         self.assertTrue(np.array_equal(
             b.grad, [(-a.data * np.power(b.data, -2)).sum()]))
+
+    def test_div_scalar2(self):
+        a = Variable([2])
+        b = Variable([10, 4, 4])
+        z = a/b
+        z.backward()
+
+        self.assertTrue(np.array_equal(z.data, np.divide(a.data, b.data)))
+        self.assertTrue(np.array_equal(a.grad, [(1/b.data).sum()]))
+        self.assertTrue(np.array_equal(
+            b.grad, np.array(-a.data * np.power(b.data, -2))))
+
+    def test_div_self(self):
+        a = Variable([2])
+        b = Variable([2, 2, 3])
+        z = (b / a) / b
+        z.backward()
+
+        self.assertTrue(np.array_equal(
+            z.data, 1/a.data * np.ones_like(b.data)))
+        self.assertTrue(np.array_equal(a.grad, [-0.75]))
+        self.assertTrue(np.array_equal(b.grad, np.zeros_like(b.data)))
+
+    def test_div_self2(self):
+        a = Variable([2])
+        b = Variable([2, 2, 3])
+        z = (a / b) / a
+        z.backward()
+
+        self.assertTrue(np.array_equal(
+            z.data, 1/b.data * np.ones_like(a.data)))
+        self.assertTrue(np.array_equal(a.grad, [0]))
+        self.assertTrue(np.array_equal(b.grad, -b.data**-2))
+
+    def test_div_mul(self):
+        a = Variable([4, 5, 4])
+        b = Variable([2, 2, 3])
+        z = (a/b)*a
+        z.backward()
+
+        self.assertTrue(np.array_equal(
+            z.data, np.divide(a.data, b.data)*a.data))
+        self.assertTrue(np.array_equal(a.grad, 2*a.data/b.data))
+        self.assertTrue(np.array_equal(b.grad, -a.data**2/b.data**2))
 
 
 if __name__ == '__main__':
