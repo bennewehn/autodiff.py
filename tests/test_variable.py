@@ -1,6 +1,6 @@
-import unittest
-from src.variable import Variable
 import numpy as np
+import unittest
+from autodiff import Variable
 
 
 class TestVariable(unittest.TestCase):

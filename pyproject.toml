@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autodiff"
+version = "0.0.1"
+authors = [
+  { name="Benedikt Wehner", email="benedikt.wehner@outlook.de" },
+]
+description = "Simple automatic differentiation in python."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/bennewehn/autodiff.py"
+"Bug Tracker" = "https://github.com/bennewehn/autodiff.py/issues"

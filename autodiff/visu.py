@@ -1,5 +1,5 @@
 import graphviz
-from src.variable import Variable
+from variable import Variable
 
 
 def draw_graph(root: Variable, format='svg', rankdir='LR') -> graphviz.Digraph:
