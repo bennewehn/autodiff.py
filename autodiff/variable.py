@@ -46,6 +46,9 @@ class Variable:
     def __mul__(self, other):
         return Mul(self, self.__get_other(other)).forward()
 
+    def __truediv__(self, other):
+        return Div(self, self.__get_other(other)).forward()
+
     def __matmul__(self, other):
         return Dot(self, self.__get_other(other)).forward()
 
@@ -131,6 +134,27 @@ class Mul(Function):
             self.y.grad += self.x.data * self.out.grad
 
 
+class Div(Function):
+    def __init__(self, x: Variable, y: Variable):
+        self.x, self.y = x, y
+        self.graph_label = 'div()'
+
+    def forward(self):
+        self.out = Variable(np.divide(self.x.data, self.y.data).astype(
+            self.x.dtype), _children=(self.x, self.y), _fn=self)
+        return self.out
+
+    def backward(self):
+        self.x.grad += (1 / self.y.data) * self.out.grad
+        # match scalar shape
+        if self.y.grad.shape[0] == 1:
+            self.y.grad += np.array((-self.x.data *
+                                     np.power(self.y.data, -2) * self.out.grad).sum())
+        else:
+            self.y.grad += -self.x.data * \
+                np.power(self.y.data, -2) * self.out.grad
+
+
 class Pow(Function):
     def __init__(self, x: Variable, y: Variable):
         self.x, self.y = x, y
@@ -149,9 +173,10 @@ class Pow(Function):
             self.y.grad += self.out.data * np.log(self.x.data)
         if self.x.grad.shape[0] == 1:
             self.x.grad += (self.y.data *
-                            np.power(self.x.data, self.y.data-1)).sum()
+                            np.power(self.x.data, self.y.data-1) * self.out.grad).sum()
         else:
-            self.x.grad += self.y.data * np.power(self.x.data, self.y.data-1)
+            self.x.grad += self.y.data * \
+                np.power(self.x.data, self.y.data-1) * self.out.grad
 
 
 '''Unary ops'''

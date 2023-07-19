@@ -198,6 +198,29 @@ class TestVariable(unittest.TestCase):
             a.grad, [(np.power(b.data, a.data) * np.log(b.data)).sum()]))
         self.assertTrue(np.array_equal(b.grad, 2*b.data))
 
+    def test_div(self):
+        a = Variable([10, 4, 4])
+        b = Variable([1, 2, 3])
+        z = a/b
+        z.backward()
+
+        self.assertTrue(np.array_equal(z.data, np.divide(a.data, b.data)))
+        self.assertTrue(np.array_equal(a.grad, 1/b.data))
+        self.assertTrue(np.array_equal(b.grad, -a.data * np.power(b.data, -2)))
+
+    def test_div_scalar(self):
+        a = Variable([10, 4, 4])
+        b = Variable([2])
+        z = a/b
+        z.backward()
+
+        self.assertTrue(np.array_equal(
+            z.data, np.divide(a.data, b.data)))
+        self.assertTrue(np.array_equal(
+            a.grad, (1/b.data) * np.ones_like(a.data)))
+        self.assertTrue(np.array_equal(
+            b.grad, [(-a.data * np.power(b.data, -2)).sum()]))
+
 
 if __name__ == '__main__':
     unittest.main()
