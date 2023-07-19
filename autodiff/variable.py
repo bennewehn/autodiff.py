@@ -145,7 +145,10 @@ class Div(Function):
         return self.out
 
     def backward(self):
-        self.x.grad += (1 / self.y.data) * self.out.grad
+        if self.x.grad.shape[0] == 1:
+            self.x.grad += ((1 / self.y.data) * self.out.grad).sum()
+        else:
+            self.x.grad += (1 / self.y.data) * self.out.grad
         # match scalar shape
         if self.y.grad.shape[0] == 1:
             self.y.grad += np.array((-self.x.data *
@@ -168,9 +171,10 @@ class Pow(Function):
     def backward(self):
         # match scalar shape
         if self.y.grad.shape[0] == 1:
-            self.y.grad += (self.out.data * np.log(self.x.data)).sum()
+            self.y.grad += (self.out.data * np.log(self.x.data)
+                            * self.out.grad).sum()
         else:
-            self.y.grad += self.out.data * np.log(self.x.data)
+            self.y.grad += self.out.data * np.log(self.x.data) * self.out.grad
         if self.x.grad.shape[0] == 1:
             self.x.grad += (self.y.data *
                             np.power(self.x.data, self.y.data-1) * self.out.grad).sum()
