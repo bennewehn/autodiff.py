@@ -123,15 +123,17 @@ class Mul(Function):
         return self.out
 
     def backward(self):
+        x = self.y.data * self.out.grad
+        y = self.x.data * self.out.grad
         # match scalar shape
         if self.x.grad.shape[0] == 1:
-            self.x.grad += (self.y.data * self.out.grad).sum()
+            self.x.grad += x.sum()
         else:
-            self.x.grad += self.y.data * self.out.grad
+            self.x.grad += x
         if self.y.grad.shape[0] == 1:
-            self.y.grad += (self.x.data * self.out.grad).sum()
+            self.y.grad += y.sum()
         else:
-            self.y.grad += self.x.data * self.out.grad
+            self.y.grad += y
 
 
 class Div(Function):
@@ -145,17 +147,17 @@ class Div(Function):
         return self.out
 
     def backward(self):
+        x = (1 / self.y.data) * self.out.grad
+        y = np.array(
+            (-self.x.data * np.power(self.y.data, -2) * self.out.grad))
         if self.x.grad.shape[0] == 1:
-            self.x.grad += ((1 / self.y.data) * self.out.grad).sum()
+            self.x.grad += x.sum()
         else:
-            self.x.grad += (1 / self.y.data) * self.out.grad
-        # match scalar shape
+            self.x.grad += x
         if self.y.grad.shape[0] == 1:
-            self.y.grad += np.array((-self.x.data *
-                                     np.power(self.y.data, -2) * self.out.grad).sum())
+            self.y.grad += y.sum()
         else:
-            self.y.grad += -self.x.data * \
-                np.power(self.y.data, -2) * self.out.grad
+            self.y.grad += y
 
 
 class Pow(Function):
@@ -169,18 +171,16 @@ class Pow(Function):
         return self.out
 
     def backward(self):
-        # match scalar shape
+        y = self.out.data * np.log(self.x.data) * self.out.grad
+        x = self.y.data * np.power(self.x.data, self.y.data-1) * self.out.grad
         if self.y.grad.shape[0] == 1:
-            self.y.grad += (self.out.data * np.log(self.x.data)
-                            * self.out.grad).sum()
+            self.y.grad += y.sum()
         else:
-            self.y.grad += self.out.data * np.log(self.x.data) * self.out.grad
+            self.y.grad += y
         if self.x.grad.shape[0] == 1:
-            self.x.grad += (self.y.data *
-                            np.power(self.x.data, self.y.data-1) * self.out.grad).sum()
+            self.x.grad += x.sum()
         else:
-            self.x.grad += self.y.data * \
-                np.power(self.x.data, self.y.data-1) * self.out.grad
+            self.x.grad += x
 
 
 '''Unary ops'''
