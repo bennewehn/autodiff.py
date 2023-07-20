@@ -1,2 +1,4 @@
 graphviz==0.20.1
 numpy==1.25.1
+Requests==2.31.0
+tqdm==4.65.0
