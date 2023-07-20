@@ -2,7 +2,7 @@ import numpy as np
 import gzip
 import struct
 import os
-from .utils import download
+from .utils import get
 
 
 def fetch_mnist() -> tuple[list[tuple[np.ndarray, np.uint8]], list[tuple[np.ndarray, np.uint8]]]:
@@ -18,13 +18,6 @@ def fetch_mnist() -> tuple[list[tuple[np.ndarray, np.uint8]], list[tuple[np.ndar
 
     url = "http://yann.lecun.com/exdb/mnist/"
     dir = "./data/"
-
-    def get(url, name, dir):
-        if not os.path.exists(dir):
-            os.mkdir(dir)
-        path = os.path.join(dir + name)
-        if not os.path.isfile(path):
-            download(url + name, path)
 
     DATA_TYPES = {0x08: np.ubyte,
                   0x09: np.byte,
