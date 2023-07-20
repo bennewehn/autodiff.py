@@ -325,6 +325,23 @@ class TestVariable(unittest.TestCase):
         self.assertTrue(np.array_equal(a.grad, 2*a.data/b.data))
         self.assertTrue(np.array_equal(b.grad, -a.data**2/b.data**2))
 
+    def test_relu(self):
+        a = Variable([-1, -2, 3])
+        z = a.relu()
+        z.backward()
+
+        self.assertTrue(np.array_equal(z.data, np.maximum(0, a.data)))
+        self.assertTrue(np.array_equal(a.grad, [0, 0, 1]))
+
+    def test_relu2(self):
+        a = Variable([-1, -2, 3])
+        b = Variable([3])
+        z = a.relu() * b
+        z.backward()
+
+        self.assertTrue(np.array_equal(z.data, np.maximum(0, a.data)*b.data))
+        self.assertTrue(np.array_equal(a.grad, [0, 0, 3]))
+
 
 if __name__ == '__main__':
     unittest.main()

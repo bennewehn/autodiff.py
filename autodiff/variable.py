@@ -67,6 +67,9 @@ class Variable:
     def exp(self):
         return Exp(self).forward()
 
+    def relu(self):
+        return Relu(self).forward()
+
     def __repr__(self):
         return f"Variable(data={self.data}, fn={self.fn}, grad={self.grad})"
 
@@ -198,6 +201,21 @@ class Exp(Function):
 
     def backward(self):
         self.x.grad += self.out.data * self.out.grad
+
+
+class Relu(Function):
+    def __init__(self, x: Variable):
+        self.x = x
+        self.graph_label = 'relu()'
+
+    def forward(self):
+        self.out = Variable(
+            np.maximum(0, self.x.data, dtype=self.x.dtype), _children=[self.x], _fn=self)
+        return self.out
+
+    def backward(self):
+        self.x.grad += np.where(self.x.data > 0, 1,
+                                0).astype(self.x.dtype) * self.out.grad
 
 
 '''Reduce ops'''
