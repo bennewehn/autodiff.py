@@ -2,7 +2,7 @@ import numpy as np
 import gzip
 import struct
 import os
-from .utils import get
+from .utils import download
 
 
 def fetch_mnist() -> tuple[list[tuple[np.ndarray, np.uint8]], list[tuple[np.ndarray, np.uint8]]]:
@@ -43,10 +43,28 @@ def fetch_mnist() -> tuple[list[tuple[np.ndarray, np.uint8]], list[tuple[np.ndar
             # reshape images to single dim
             if len(dimension_sizes) == 3:
                 data = data.reshape(
-                    dimension_sizes[0], dimension_sizes[1] * dimension_sizes[2], 1)
+                    dimension_sizes[0], dimension_sizes[1] * dimension_sizes[2])
             else:
                 data.reshape(dimension_sizes)
 
             temp.append(data)
 
     return list(zip(temp[0], temp[1])), list(zip(temp[2], temp[3]))
+
+
+def get(url: str, name: str, dir: str) -> None:
+    """
+    Downloads file by url and name and saves it in dir with name
+    if it doesn't exists.
+
+    Args:
+        url (str): Url prefix of file to download.
+        name (str): Name of file. Gets appended to url.
+        dir (str): Directory in which the file should be saved.
+    """
+    import os
+    if not os.path.exists(dir):
+        os.mkdir(dir)
+    path = os.path.join(dir + name)
+    if not os.path.isfile(path):
+        download(url + name, path)

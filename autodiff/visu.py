@@ -1,8 +1,8 @@
 import graphviz
-from .variable import Variable
+from .tensor import Tensor
 
 
-def draw_graph(root: Variable, format='svg', rankdir='LR') -> graphviz.Digraph:
+def draw_graph(root: Tensor, format='svg', rankdir='LR') -> graphviz.Digraph:
     """
     Draws graph starting from root Variable. 
 
@@ -12,7 +12,7 @@ def draw_graph(root: Variable, format='svg', rankdir='LR') -> graphviz.Digraph:
     """
     dot = graphviz.Digraph(format=format, graph_attr={'rankdir': rankdir})
 
-    def build(root: Variable):
+    def build(root: Tensor):
         dat_name = str(id(root))
         if root.fn is not None:
             op_name = str(id(root))+root.fn.graph_label
@@ -22,8 +22,8 @@ def draw_graph(root: Variable, format='svg', rankdir='LR') -> graphviz.Digraph:
                 if op_name is not None:
                     dot.edge(tail_name=str(id(child)), head_name=op_name)
                 build(child)
-        dot.node(name=str(id(root)), label='{data=%s | grad=%s}' % (
-            str(root.data), str(root.grad)), shape='record')
+        dot.node(name=str(id(root)), label='{data=%s; shape=%s | grad=%s}' % (
+            str(root.data)[:15]+'...', root.data.shape, str(root.grad)[:15]+'...'), shape='record')
     build(root)
 
     return dot

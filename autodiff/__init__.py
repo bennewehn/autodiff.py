@@ -1,1 +1,1 @@
-from .variable import Variable
+from .tensor import Tensor

@@ -31,12 +31,3 @@ def download(url: str, filename: str):
             shutil.copyfileobj(r_raw, f)
 
     return path
-
-
-def get(url, name, dir):
-    import os
-    if not os.path.exists(dir):
-        os.mkdir(dir)
-    path = os.path.join(dir + name)
-    if not os.path.isfile(path):
-        download(url + name, path)
