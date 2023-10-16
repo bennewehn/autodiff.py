@@ -20,6 +20,9 @@ class TestTensorMulOperator(unittest.TestCase):
         out = a * b
         out.backward()
 
+        assert a.grad is not None
+        assert b.grad is not None
+
         self.assertTrue(np.array_equal(a.grad, [2, 3, 4]))
         self.assertTrue(np.array_equal(b.grad, [1, 2, 3]))
 
@@ -30,6 +33,9 @@ class TestTensorMulOperator(unittest.TestCase):
         out = a * b
         out.backward()
 
+        assert a.grad is not None
+        assert b.grad is not None
+
         self.assertTrue(np.array_equal(a.grad, [9]))
         self.assertTrue(np.array_equal(b.grad, [4, 4, 4]))
 
@@ -38,6 +44,8 @@ class TestTensorMulOperator(unittest.TestCase):
 
         out = a * 5
         out.backward()
+
+        assert a.grad is not None
 
         self.assertTrue(np.array_equal(out.data, [10, 15, 20]))
         self.assertTrue(np.array_equal(a.grad, [5, 5, 5]))
@@ -48,6 +56,8 @@ class TestTensorMulOperator(unittest.TestCase):
         out = 5 * a
         out.backward()
 
+        assert a.grad is not None
+
         self.assertTrue(np.array_equal(out.data, [10, 15, 20]))
         self.assertTrue(np.array_equal(a.grad, [5, 5, 5]))
 
@@ -57,6 +67,9 @@ class TestTensorMulOperator(unittest.TestCase):
 
         out = a * b
         out.backward()
+
+        assert a.grad is not None
+        assert b.grad is not None
 
         self.assertTrue(np.array_equal(out.data, [[2, 6], [3, 10]]))
         self.assertTrue(np.array_equal(a.grad, [[1, 2], [3, 5]]))
@@ -69,6 +82,9 @@ class TestTensorMulOperator(unittest.TestCase):
         out = a * b
         out.backward()
 
+        assert a.grad is not None
+        assert b.grad is not None
+
         self.assertTrue(np.array_equal(out.data, [[8, 15], [4, 10]]))
         self.assertTrue(np.array_equal(a.grad, [[4, 5], [4, 5]]))
         self.assertTrue(np.array_equal(b.grad, [3, 5]))
@@ -79,7 +95,7 @@ class TestTensorMulOperator(unittest.TestCase):
         out = a * a * a
         out.backward()
 
-        print(a.grad)
+        assert a.grad is not None
 
         self.assertTrue(np.array_equal(out.data, [64, 125]))
         self.assertTrue(np.array_equal(a.grad, [48, 75]))

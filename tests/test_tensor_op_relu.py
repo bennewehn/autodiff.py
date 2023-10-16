@@ -18,4 +18,6 @@ class TestTensorReluOperator(unittest.TestCase):
         out = a.relu()
         out.backward()
 
+        assert a.grad is not None
+
         self.assertTrue(np.array_equal(a.grad, [0, 0, 1]))

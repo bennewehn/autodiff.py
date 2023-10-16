@@ -20,6 +20,9 @@ class TestTensorPowOperator(unittest.TestCase):
         out = a.pow(b)
         out.backward()
 
+        assert a.grad is not None
+        assert b.grad is not None
+
         self.assertTrue(np.array_equal(a.grad, [2, 4, 6]))
         self.assertAlmostEqual(b.grad[0], 12.66, 3)
 
@@ -28,5 +31,7 @@ class TestTensorPowOperator(unittest.TestCase):
 
         out = a.pow(a)
         out.backward()
+
+        assert a.grad is not None
 
         self.assertTrue(np.allclose(a.grad, [1, 6.77258, 56.66253]))

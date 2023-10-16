@@ -18,4 +18,6 @@ class TestTensorNegOperator(unittest.TestCase):
         out = -a
         out.backward()
 
+        assert a.grad is not None
+
         self.assertTrue(np.array_equal(a.grad, [-1, -1, -1]))

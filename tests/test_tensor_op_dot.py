@@ -20,6 +20,9 @@ class TestTensorDotOperator(unittest.TestCase):
         out = a @ b
         out.backward()
 
+        assert a.grad is not None
+        assert b.grad is not None
+
         self.assertTrue(np.array_equal(a.grad, [2, 3, 4]))
         self.assertTrue(np.array_equal(b.grad, [1, 2, 3]))
 
@@ -29,6 +32,9 @@ class TestTensorDotOperator(unittest.TestCase):
 
         out = a @ b
         out.backward()
+
+        assert a.grad is not None
+        assert b.grad is not None
 
         self.assertTrue(np.array_equal(a.grad, [[12, 6], [12, 6]]))
         self.assertTrue(np.array_equal(b.grad, [[4, 4, 4], [6, 6, 6]]))

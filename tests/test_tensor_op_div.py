@@ -20,7 +20,8 @@ class TestTensorDivOperator(unittest.TestCase):
         out = a / b
         out.backward()
 
-        print(a.grad)
+        assert a.grad is not None
+        assert b.grad is not None
 
         self.assertTrue(np.allclose(a.grad, [0.5, 0.25, 0.1666], 0.01))
         self.assertTrue(np.allclose(b.grad, [-0.25, -0.125, -0.08333], 0.01))
@@ -31,6 +32,9 @@ class TestTensorDivOperator(unittest.TestCase):
 
         out = a / b
         out.backward()
+
+        assert a.grad is not None
+        assert b.grad is not None
 
         self.assertTrue(np.array_equal(a.grad, [0.5, 0.5, 0.5]))
         self.assertTrue(np.array_equal(b.grad, [-1.5]))

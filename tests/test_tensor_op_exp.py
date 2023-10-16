@@ -18,4 +18,6 @@ class TestTensorExpOperator(unittest.TestCase):
         out = a.exp()
         out.backward()
 
-        self.assertTrue(np.allclose(out.grad, out.data, 10))
+        assert a.grad is not None
+
+        self.assertTrue(np.allclose(a.grad, out.data, 10))

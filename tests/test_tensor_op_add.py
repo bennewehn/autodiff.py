@@ -20,6 +20,10 @@ class TestTensorAddOperator(unittest.TestCase):
         out = a + b
         out.backward()
 
+        assert out.grad is not None
+        assert a.grad is not None
+        assert b.grad is not None
+
         self.assertTrue(np.array_equal(out.data, [3, 5, 7]))
         self.assertTrue(np.array_equal(out.grad, [1, 1, 1]))
 
@@ -41,6 +45,9 @@ class TestTensorAddOperator(unittest.TestCase):
         out = a + b
         out.backward()
 
+        assert a.grad is not None
+        assert b.grad is not None
+
         self.assertTrue(np.array_equal(out.data, [4, 5, 6]))
         self.assertTrue(np.array_equal(a.grad, [3]))
         self.assertTrue(np.array_equal(b.grad, [1, 1, 1]))
@@ -51,6 +58,8 @@ class TestTensorAddOperator(unittest.TestCase):
         out = a+a+a
         out.backward()
 
+        assert a.grad is not None
+
         self.assertTrue(np.array_equal(out.data, 3*a.data))
         self.assertTrue(np.array_equal(a.grad, [3]))
 
@@ -59,6 +68,8 @@ class TestTensorAddOperator(unittest.TestCase):
 
         out = a+2
         out.backward()
+
+        assert a.grad is not None
 
         self.assertTrue(np.array_equal(out.data, [4, 5, 6]))
         self.assertTrue(np.array_equal(a.grad, [1, 1, 1]))
@@ -78,5 +89,6 @@ class TestTensorAddOperator(unittest.TestCase):
 
         self.assertTrue(np.array_equal(out.data, [6, 9, 12]))
 
-        print(a.grad)
+        assert a.grad is not None
+
         self.assertTrue(np.array_equal(a.grad, [3, 3, 3]))
