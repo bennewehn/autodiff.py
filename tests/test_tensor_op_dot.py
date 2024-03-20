@@ -38,3 +38,16 @@ class TestTensorDotOperator(unittest.TestCase):
 
         self.assertTrue(np.array_equal(a.grad, [[12, 6], [12, 6]]))
         self.assertTrue(np.array_equal(b.grad, [[4, 4, 4], [6, 6, 6]]))
+
+    def test_mul_backward_ma5_vec(self):
+        a = Tensor([[1, 2, 3], [3, 4, 1]], requires_grad=True)
+        b = Tensor([3, 4, 5], requires_grad=True)
+
+        out = a @ b
+        out.backward()
+
+        assert a.grad is not None
+        assert b.grad is not None
+
+        self.assertTrue(np.array_equal(a.grad, [[3, 4, 5], [3, 4, 5]]))
+        self.assertTrue(np.array_equal(b.grad, [4, 6, 4]))

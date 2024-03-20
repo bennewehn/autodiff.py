@@ -302,6 +302,8 @@ class Pow(Operator):
 class Dot(Operator):
     def __init__(self, x: Tensor, y: Tensor):
         self.x, self.y = x, y
+
+        # (10, 784, ) @ (784,) => (10,)
         self.graph_label = '@'
 
     def forward(self) -> Tensor:
@@ -317,20 +319,16 @@ class Dot(Operator):
 
     def backward(self):
         assert self.out.grad is not None
-
         if self.x.requires_grad:
-            y_tran = self.y.data.T
-            grad = self.out.grad
-            if y_tran.ndim == 1:
-                y_tran = y_tran.reshape((1,)+y_tran.shape)
-                grad = grad.reshape(grad+(1,))
+            # use outer product for matrix vector multiplication
+            # don't use the outer product for vector vector multiplication
+            mul = 0
+            if self.y.data.ndim == 1 and len(self.out.grad.shape) > 0:
+                mul = np.outer(self.out.grad, self.y.data.T)
+            else:
+                mul = np.dot(self.out.grad, self.y.data.T)
 
-            # (a, n) @ (n, b) = (a, b)
-
-            # shape grad: (a, n)
-            # out grad shape: (a, b) @ (b, n)
-
-            self.x.grad += np.dot(grad, y_tran)
+            self.x.grad += mul
 
         if self.y.requires_grad:
             self.y.grad += np.dot(self.x.data.T, self.out.grad)
