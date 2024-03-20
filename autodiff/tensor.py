@@ -111,9 +111,6 @@ class Tensor:
         # overloading self @ other
         return Dot(self, self.__get_other(other)).forward()
 
-    def transpose(self):
-        return self.data.T
-
     def __pow__(self, other) -> 'Tensor':
         return Pow(self, self.__get_other(other)).forward()
 
@@ -134,6 +131,9 @@ class Tensor:
 
     def log(self) -> 'Tensor':
         return Log(self).forward()
+
+    def transpose(self) -> 'Tensor':
+        return Transpose(self).forward()
 
     def __len__(self) -> int:
         return len(self.data)
@@ -302,8 +302,6 @@ class Pow(Operator):
 class Dot(Operator):
     def __init__(self, x: Tensor, y: Tensor):
         self.x, self.y = x, y
-
-        # (10, 784, ) @ (784,) => (10,)
         self.graph_label = '@'
 
     def forward(self) -> Tensor:
@@ -479,3 +477,23 @@ class Relu(Operator):
 
         self.x.grad += np.where(self.x.data > 0, 1,
                                 0).astype(self.x.dtype) * self.out.grad
+
+
+class Transpose(Operator):
+    def __init__(self, x: Tensor):
+        self.x = x
+        self.graph_label = 'transpose()'
+
+    def forward(self):
+        self.out = Tensor(
+            self.x.data.transpose(),
+            _children=[self.x], _op=self,
+            requires_grad=self.x.requires_grad)
+
+        return self.out
+
+    def backward(self):
+        assert self.out.grad is not None
+        assert self.x.grad is not None
+
+        self.x.grad += self.out.grad.transpose()
