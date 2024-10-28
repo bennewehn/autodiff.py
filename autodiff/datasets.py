@@ -55,7 +55,7 @@ def fetch_mnist() -> tuple[list[tuple[np.ndarray, np.uint8]], list[tuple[np.ndar
 def get(url: str, name: str, dir: str) -> None:
     """
     Downloads file by url and name and saves it in dir with name
-    if it doesn't exists.
+    if it doesn't exist.
 
     Args:
         url (str): Url prefix of file to download.

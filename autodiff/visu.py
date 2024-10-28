@@ -4,7 +4,7 @@ from .tensor import Tensor
 
 def draw_graph(root: Tensor, format='svg', rankdir='LR') -> graphviz.Digraph:
     """
-    Draws graph starting from root Variable. 
+    Draws graph starting from root Tensor. 
 
     Args:
         format (str): See formats https://graphviz.org/docs/outputs/
